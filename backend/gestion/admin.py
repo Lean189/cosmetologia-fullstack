@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Servicio, Cliente, Cita 
+from .models import Servicio, Cliente, Cita, BloqueoHorario, ConfiguracionHorario
 
 # 1. Registra el modelo Servicio
 @admin.register(Servicio)
@@ -24,3 +24,18 @@ class CitaAdmin(admin.ModelAdmin):
     list_filter = ('estado', 'servicio')
     search_fields = ('cliente__nombre', 'cliente__apellido')
     list_editable = ('estado',)
+
+@admin.register(BloqueoHorario)
+class BloqueoHorarioAdmin(admin.ModelAdmin):
+    list_display = ('fecha', 'razon')
+    ordering = ('fecha',)
+
+@admin.register(ConfiguracionHorario)
+class ConfiguracionHorarioAdmin(admin.ModelAdmin):
+    list_display = ('get_dia_semana_display', 'activo', 'hora_apertura', 'hora_cierre')
+    list_editable = ('activo', 'hora_apertura', 'hora_cierre')
+    ordering = ('dia_semana',)
+    
+    def get_dia_semana_display(self, obj):
+        return obj.get_dia_semana_display()
+    get_dia_semana_display.short_description = 'Día de la Semana'
