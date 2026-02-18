@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const servicios = await prisma.servicio.findMany({
-            where: { activo: true },
-            orderBy: { nombre: 'asc' },
-        });
-        return NextResponse.json(servicios);
+        const { data, error } = await supabase
+            .from('servicios')
+            .select('*')
+            .eq('activo', true)
+            .order('nombre', { ascending: true });
+
+        if (error) throw error;
+        return NextResponse.json(data);
     } catch (error) {
         console.error('API Error (Servicios):', error);
         return NextResponse.json({ error: 'Error al obtener servicios' }, { status: 500 });

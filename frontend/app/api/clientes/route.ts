@@ -1,31 +1,34 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
         const { nombre, apellido, email, telefono } = body;
 
-        // Buscar si ya existe el cliente por email
-        const clienteExistente = await prisma.cliente.findUnique({
-            where: { email },
-        });
+        // Buscar si ya existe
+        const { data: existing } = await supabase
+            .from('clientes')
+            .select('id')
+            .eq('email', email)
+            .single();
 
-        if (clienteExistente) {
-            return NextResponse.json(clienteExistente);
+        if (existing) {
+            return NextResponse.json(existing);
         }
 
-        // Si no existe, crearlo
-        const nuevoCliente = await prisma.cliente.create({
-            data: {
-                nombre,
-                apellido: apellido || 'ClienteWeb',
-                email,
-                telefono,
-            },
-        });
+        const { data: nuevo, error } = await supabase
+            .from('clientes')
+            .insert([
+                { nombre, apellido: apellido || 'ClienteWeb', email, telefono }
+            ])
+            .select()
+            .single();
 
-        return NextResponse.json(nuevoCliente, { status: 201 });
+        if (error) throw error;
+        return NextResponse.json(nuevo, { status: 201 });
     } catch (error) {
         console.error('API Error (Clientes):', error);
         return NextResponse.json({ error: 'Error al procesar cliente' }, { status: 500 });

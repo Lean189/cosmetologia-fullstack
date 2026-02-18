@@ -1,5 +1,5 @@
 import { format, addMinutes, parse, isBefore, isEqual, startOfDay } from 'date-fns';
-import prisma from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 
 export async function getAvailableSlots(servicioId: string, fechaStr: string) {
     const fecha = parse(fechaStr, 'yyyy-MM-dd', new Date());
@@ -10,32 +10,39 @@ export async function getAvailableSlots(servicioId: string, fechaStr: string) {
     }
 
     // 1. Verificar bloqueos
-    const bloqueo = await prisma.bloqueoHorario.findUnique({
-        where: { fecha },
-    });
+    const { data: bloqueo } = await supabase
+        .from('bloqueos_horario')
+        .select('id')
+        .eq('fecha', fechaStr)
+        .single();
+
     if (bloqueo) return [];
 
     // 2. Obtener configuración de horario
-    const diaSemana = fecha.getDay() === 0 ? 6 : fecha.getDay() - 1; // JS (0=Sun) to UI/Django (0=Mon, 6=Sun)
-    const config = await prisma.configuracionHorario.findUnique({
-        where: { dia_semana: diaSemana },
-    });
+    const diaSemana = fecha.getDay() === 0 ? 6 : fecha.getDay() - 1;
+    const { data: config } = await supabase
+        .from('configuracion_horario')
+        .select('*')
+        .eq('dia_semana', diaSemana)
+        .eq('activo', true)
+        .single();
 
-    if (!config || !config.activo) return [];
+    if (!config) return [];
 
-    const servicio = await prisma.servicio.findUnique({
-        where: { id: servicioId },
-    });
+    const { data: servicio } = await supabase
+        .from('servicios')
+        .select('duracion_minutos')
+        .eq('id', servicioId)
+        .single();
+
     if (!servicio) throw new Error('Servicio no encontrado');
 
     // 3. Obtener citas existentes
-    const citas = await prisma.cita.findMany({
-        where: {
-            fecha: fecha,
-            estado: { not: 'A' },
-        },
-        include: { servicio: true },
-    });
+    const { data: citas } = await supabase
+        .from('citas')
+        .select('hora_inicio, servicios(duracion_minutos)')
+        .eq('fecha', fechaStr)
+        .neq('estado', 'A');
 
     const slots: string[] = [];
     const duracion = servicio.duracion_minutos;
@@ -43,7 +50,6 @@ export async function getAvailableSlots(servicioId: string, fechaStr: string) {
     let current = parse(config.hora_apertura, 'HH:mm', fecha);
     const end = parse(config.hora_cierre, 'HH:mm', fecha);
 
-    // Si es hoy, empezar desde el siguiente slot de 30 min
     if (isEqual(fecha, today)) {
         const now = new Date();
         while (isBefore(current, now)) {
@@ -55,9 +61,9 @@ export async function getAvailableSlots(servicioId: string, fechaStr: string) {
         const slotInicio = current;
         const slotFin = addMinutes(current, duracion);
 
-        const isConflicting = citas.some((cita) => {
+        const isConflicting = (citas || []).some((cita: any) => {
             const citaInicio = parse(cita.hora_inicio, 'HH:mm', fecha);
-            const citaFin = addMinutes(citaInicio, cita.servicio.duracion_minutos);
+            const citaFin = addMinutes(citaInicio, cita.servicios.duracion_minutos);
             return isBefore(slotInicio, citaFin) && isBefore(citaInicio, slotFin);
         });
 

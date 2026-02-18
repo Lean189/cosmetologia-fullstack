@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const config = await prisma.configuracionHorario.findMany({
-            where: { activo: true },
-            orderBy: { dia_semana: 'asc' },
-        });
-        return NextResponse.json(config);
+        const { data, error } = await supabase
+            .from('configuracion_horario')
+            .select('*')
+            .eq('activo', true)
+            .order('dia_semana', { ascending: true });
+
+        if (error) throw error;
+        return NextResponse.json(data);
     } catch (error) {
         console.error('API Error (Config):', error);
         return NextResponse.json({ error: 'Error al obtener configuración' }, { status: 500 });

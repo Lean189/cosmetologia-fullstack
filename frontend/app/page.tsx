@@ -15,29 +15,21 @@ interface Servicio {
 }
 
 // --- CONSTANTES ---
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/';
+import { supabase } from '@/lib/supabase';
 
 // --- FUNCION DE FETCHING (Server Component) ---
 async function getServicios(): Promise<Servicio[]> {
   try {
-    // La petición se hace en el servidor de Next.js usando fetch nativo
-    // Usamos la URL absoluta en el servidor o relativa si es posible
-    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
-    const response = await fetch(`${baseUrl}${API_URL}servicios/`, {
-      cache: 'no-store', // Siempre obtener datos frescos
-    });
+    const { data, error } = await supabase
+      .from('servicios')
+      .select('*')
+      .eq('activo', true)
+      .order('nombre', { ascending: true });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data: Servicio[] = await response.json();
-
-    // Retorna solo los servicios activos
-    return data.filter(s => s.activo);
+    if (error) throw error;
+    return data || [];
   } catch (error) {
     console.error("Error al obtener servicios:", error);
-    // Devuelve un array vacío para que la página no falle
     return [];
   }
 }

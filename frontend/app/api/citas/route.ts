@@ -1,70 +1,76 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
         const { cliente, servicio, fecha, hora_inicio, notas } = body;
 
-        // 1. Validar que no exista ya una cita en ese horario
-        const citaExistente = await prisma.cita.findUnique({
-            where: {
-                fecha_hora_inicio: {
-                    fecha: new Date(fecha),
-                    hora_inicio,
-                },
-            },
-        });
+        // 1. Validar disponibilidad (doble check)
+        const { data: existing } = await supabase
+            .from('citas')
+            .select('id')
+            .eq('fecha', fecha)
+            .eq('hora_inicio', hora_inicio)
+            .neq('estado', 'A')
+            .single();
 
-        if (citaExistente && citaExistente.estado !== 'A') {
+        if (existing) {
             return NextResponse.json({ error: 'El horario ya no está disponible' }, { status: 400 });
         }
 
         // 2. Crear la cita
-        const nuevaCita = await prisma.cita.create({
-            data: {
-                clienteId: cliente,
-                servicioId: servicio,
-                fecha: new Date(fecha),
-                hora_inicio,
-                notas,
-            },
-            include: {
-                cliente: true,
-                servicio: true,
-            },
-        });
+        const { data: nuevaCita, error } = await supabase
+            .from('citas')
+            .insert([
+                {
+                    cliente_id: cliente,
+                    servicio_id: servicio,
+                    fecha,
+                    hora_inicio,
+                    notas,
+                    estado: 'P'
+                }
+            ])
+            .select('*, clientes(*), servicios(*)')
+            .single();
 
-        // 3. Enviar correos de confirmación (si hay API key)
-        if (process.env.RESEND_API_KEY) {
+        if (error) throw error;
+
+        // 3. Enviar correos (Resend)
+        if (resend) {
             try {
-                // Al dueño/admin
+                const clienteData = nuevaCita.clientes;
+                const servicioData = nuevaCita.servicios;
+
+                // Al admin
                 await resend.emails.send({
                     from: 'Cosmetología <onboarding@resend.dev>',
                     to: process.env.ADMIN_EMAIL || 'admin@example.com',
                     subject: 'Nueva Reserva Confirmada',
                     html: `<p>Nueva cita reservada!</p>
-                 <p><b>Cliente:</b> ${nuevaCita.cliente.nombre} ${nuevaCita.cliente.apellido}</p>
-                 <p><b>Servicio:</b> ${nuevaCita.servicio.nombre}</p>
+                 <p><b>Cliente:</b> ${clienteData.nombre} ${clienteData.apellido}</p>
+                 <p><b>Servicio:</b> ${servicioData.nombre}</p>
                  <p><b>Fecha:</b> ${fecha} a las ${hora_inicio}</p>`,
                 });
 
                 // Al cliente
                 await resend.emails.send({
                     from: 'Cosmetología <onboarding@resend.dev>',
-                    to: nuevaCita.cliente.email,
+                    to: clienteData.email,
                     subject: 'Confirmación de tu Cita',
-                    html: `<p>Hola ${nuevaCita.cliente.nombre},</p>
-                 <p>Tu cita para <b>${nuevaCita.servicio.nombre}</b> ha sido confirmada.</p>
+                    html: `<p>Hola ${clienteData.nombre},</p>
+                 <p>Tu cita para <b>${servicioData.nombre}</b> ha sido confirmada.</p>
                  <p>Fecha: ${fecha}<br>Hora: ${hora_inicio}</p>
                  <p>¡Te esperamos!</p>`,
                 });
             } catch (emailError) {
-                console.error('Error enviando emails:', emailError);
-                // No fallamos la reserva si el email falla
+                console.error('Email error:', emailError);
             }
         }
 
