@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ChevronLeft, Calendar as CalendarIcon, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Clock, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 // --- INTERFACES ---
@@ -26,6 +26,8 @@ interface FormData {
 
 const API_URL = '/api/';
 
+import toast from 'react-hot-toast';
+
 export default function ReservarPage() {
   const [step, setStep] = useState(1);
   const [servicios, setServicios] = useState<Servicio[]>([]);
@@ -33,7 +35,6 @@ export default function ReservarPage() {
   const [loading, setLoading] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     cliente_nombre: '',
@@ -52,7 +53,7 @@ export default function ReservarPage() {
         setServicios(res.data);
       } catch (err) {
         console.error("Error loading services:", err);
-        setMessage({ type: 'error', text: 'No se pudieron cargar los servicios. Por favor, intenta más tarde.' });
+        toast.error('No se pudieron cargar los servicios.');
       } finally {
         setLoadingInitial(false);
       }
@@ -69,13 +70,11 @@ export default function ReservarPage() {
           const res = await axios.get(`${API_URL}servicios/${formData.servicio_id}/disponibilidad?fecha=${formData.fecha}`);
           setSlots(res.data.horarios || []);
           if (res.data.horarios?.length === 0) {
-            setMessage({ type: 'error', text: 'No hay turnos disponibles para este día.' });
-          } else {
-            setMessage(null);
+            toast('No hay turnos disponibles para este día.', { icon: 'ℹ️' });
           }
         } catch (err) {
           console.error("Error loading slots:", err);
-          setMessage({ type: 'error', text: 'Error al cargar horarios disponibles.' });
+          toast.error('Error al cargar horarios disponibles.');
         } finally {
           setLoadingSlots(false);
         }
@@ -97,7 +96,6 @@ export default function ReservarPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage(null);
 
     try {
       // Create/Get Client
@@ -115,11 +113,15 @@ export default function ReservarPage() {
         hora_inicio: formData.hora_inicio,
       });
 
-      setMessage({ type: 'success', text: '¡Cita reservada con éxito! Te hemos enviado un email de confirmación.' });
+      toast.success('¡Cita reservada con éxito!');
       setStep(4);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setMessage({ type: 'error', text: err.response?.data?.error || 'Error al procesar la reserva. Intenta de nuevo.' });
+      let errorMsg = 'Error al procesar la reserva.';
+      if (axios.isAxiosError(err) && err.response?.data?.error) {
+        errorMsg = err.response.data.error;
+      }
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -223,8 +225,8 @@ export default function ReservarPage() {
                           key={slot}
                           onClick={() => setFormData(prev => ({ ...prev, hora_inicio: slot }))}
                           className={`p-3 rounded-xl border-2 transition-all ${formData.hora_inicio === slot
-                              ? 'bg-pink-500 border-pink-500 text-white shadow-lg'
-                              : 'border-gray-100 hover:border-pink-200 text-gray-600'
+                            ? 'bg-pink-500 border-pink-500 text-white shadow-lg'
+                            : 'border-gray-100 hover:border-pink-200 text-gray-600'
                             }`}
                         >
                           {slot}
@@ -311,7 +313,7 @@ export default function ReservarPage() {
               <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle size={48} />
               </div>
-              <h1 className="text-4xl font-serif text-gray-800 mb-4">{message?.text}</h1>
+              <h1 className="text-4xl font-serif text-gray-800 mb-4">¡Cita reservada con éxito!</h1>
               <p className="text-gray-500 mb-8">Te enviaremos un recordatorio 24hs antes de tu cita.</p>
               <Link
                 href="/"
@@ -319,14 +321,6 @@ export default function ReservarPage() {
               >
                 Volver al inicio
               </Link>
-            </div>
-          )}
-
-          {message && step !== 4 && (
-            <div className={`mx-8 mb-8 p-4 rounded-xl flex items-center gap-3 ${message.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
-              }`}>
-              {message.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
-              <span className="text-sm font-medium">{message.text}</span>
             </div>
           )}
         </div>

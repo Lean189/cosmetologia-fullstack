@@ -1,12 +1,30 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+const clienteSchema = z.object({
+    nombre: z.string().min(2, "El nombre es muy corto"),
+    apellido: z.string().optional(),
+    email: z.string().email("Email inválido"),
+    telefono: z.string().optional(),
+});
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { nombre, apellido, email, telefono } = body;
+
+        // Validar con Zod
+        const validation = clienteSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({
+                error: 'Datos inválidos',
+                details: validation.error.format()
+            }, { status: 400 });
+        }
+
+        const { nombre, apellido, email, telefono } = validation.data;
 
         // Buscar si ya existe
         const { data: existing } = await supabase
