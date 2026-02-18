@@ -1,290 +1,336 @@
 // frontend/app/reservar/page.tsx
-
 "use client";
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ChevronLeft, Calendar as CalendarIcon, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
-// --- INTERFACES DE DATOS ---
+// --- INTERFACES ---
 interface Servicio {
-  id: number;
+  id: string; // Updated to String for UUID
   nombre: string;
   descripcion: string;
   precio: string;
   duracion_minutos: number;
 }
 
-interface ConfiguracionHorario {
-  dia_semana: number;
-  dia_nombre: string;
-  activo: boolean;
-  hora_apertura: string;
-  hora_cierre: string;
-}
-
 interface FormData {
   cliente_nombre: string;
   cliente_email: string;
   cliente_telefono: string;
-  servicio_id: number | null;
+  servicio_id: string | null;
   fecha: string;
   hora_inicio: string;
 }
 
-// --- CONSTANTES ---
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/';
+const API_URL = '/api/';
 
 export default function ReservarPage() {
-  const initialState: FormData = {
+  const [step, setStep] = useState(1);
+  const [servicios, setServicios] = useState<Servicio[]>([]);
+  const [slots, setSlots] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const [formData, setFormData] = useState<FormData>({
     cliente_nombre: '',
     cliente_email: '',
     cliente_telefono: '',
     servicio_id: null,
     fecha: '',
     hora_inicio: '',
-  };
+  });
 
-  const [formData, setFormData] = useState<FormData>(initialState);
-  const [servicios, setServicios] = useState<Servicio[]>([]);
-  const [diasLaborales, setDiasLaborales] = useState<number[]>([]); // Días activos (0=Lunes, 6=Domingo)
-  const [loading, setLoading] = useState(false);
-  const [loadingServicios, setLoadingServicios] = useState(true);
-  const [message, setMessage] = useState('');
-
-
-  // --- EFECTO: Carga de Servicios y Configuración de Horarios ---
+  // 1. Cargar servicios al inicio
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchServicios = async () => {
       try {
-        const [serviciosRes, configRes] = await Promise.all([
-          axios.get<Servicio[]>(`${API_URL}servicios/`),
-          axios.get<ConfiguracionHorario[]>(`${API_URL}configuracion-horario/`)
-        ]);
-
-        setServicios(serviciosRes.data);
-
-        // Filtrar solo los días activos y guardar sus índices
-        const diasActivos = configRes.data
-          .filter(d => d.activo)
-          .map(d => d.dia_semana);
-        setDiasLaborales(diasActivos);
-
+        const res = await axios.get<Servicio[]>(`${API_URL}servicios`);
+        setServicios(res.data);
       } catch (err) {
-        console.error("Error al obtener datos:", err);
-        setMessage("Error: No se pudieron cargar los datos del servidor.");
+        console.error("Error loading services:", err);
+        setMessage({ type: 'error', text: 'No se pudieron cargar los servicios. Por favor, intenta más tarde.' });
       } finally {
-        setLoadingServicios(false);
+        setLoadingInitial(false);
       }
     };
-    fetchData();
+    fetchServicios();
   }, []);
 
-  // --- VALIDACIÓN DE FECHA ---
-  const esDiaLaboral = (fechaStr: string): boolean => {
-    if (!fechaStr) return false;
-    // Crear fecha ajustando la zona horaria para evitar desfases
-    const fecha = new Date(fechaStr + 'T00:00:00');
-    const diaSemana = fecha.getDay(); // 0=Domingo, 1=Lunes...
+  // 2. Cargar slots cuando cambian fecha o servicio
+  useEffect(() => {
+    if (formData.fecha && formData.servicio_id) {
+      const fetchSlots = async () => {
+        setLoadingSlots(true);
+        try {
+          const res = await axios.get(`${API_URL}servicios/${formData.servicio_id}/disponibilidad?fecha=${formData.fecha}`);
+          setSlots(res.data.horarios || []);
+          if (res.data.horarios?.length === 0) {
+            setMessage({ type: 'error', text: 'No hay turnos disponibles para este día.' });
+          } else {
+            setMessage(null);
+          }
+        } catch (err) {
+          console.error("Error loading slots:", err);
+          setMessage({ type: 'error', text: 'Error al cargar horarios disponibles.' });
+        } finally {
+          setLoadingSlots(false);
+        }
+      };
+      fetchSlots();
+    }
+  }, [formData.fecha, formData.servicio_id]);
 
-    // Ajustar índice de JS (0=Domingo) a Django (0=Lunes, 6=Domingo)
-    const diaDjango = diaSemana === 0 ? 6 : diaSemana - 1;
-
-    return diasLaborales.includes(diaDjango);
+  const handleServiceSelect = (id: string) => {
+    setFormData(prev => ({ ...prev, servicio_id: id, hora_inicio: '' }));
+    setStep(2);
   };
 
-  // --- MANEJO DE CAMBIOS DEL FORMULARIO ---
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-
-    let parsedValue: string | number | null = value;
-
-    if (name === 'servicio_id') {
-      parsedValue = value ? parseInt(value) : null;
-    }
-
-    // Validación específica para fecha
-    if (name === 'fecha') {
-      if (!esDiaLaboral(value)) {
-        setMessage('⚠️ El día seleccionado no es un día laboral. Por favor elige otro.');
-        // Aquí optamos por permitir cambiar pero avisar
-      } else {
-        setMessage(''); // Limpiar mensaje si selecciona bien
-      }
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: parsedValue,
-    }));
+  const handleNextStep = () => {
+    if (step === 2 && (!formData.fecha || !formData.hora_inicio)) return;
+    setStep(prev => prev + 1);
   };
 
-  // --- MANEJO DEL ENVÍO (POST) ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
-
-    if (!formData.servicio_id || !formData.cliente_nombre || !formData.cliente_email || !formData.fecha) {
-      setMessage('Error: Por favor, completa todos los campos obligatorios.');
-      setLoading(false);
-      return;
-    }
-
-    if (!esDiaLaboral(formData.fecha)) {
-      setMessage('Error: La fecha seleccionada no corresponde a un día de atención.');
-      setLoading(false);
-      return;
-    }
+    setMessage(null);
 
     try {
-      // 1. Crear o buscar el cliente
-      const clienteResponse = await axios.post(`${API_URL}clientes/`, {
+      // Create/Get Client
+      const clienteRes = await axios.post(`${API_URL}clientes`, {
         nombre: formData.cliente_nombre,
-        apellido: "ClienteWeb",
         email: formData.cliente_email,
         telefono: formData.cliente_telefono,
       });
-      const clienteId = clienteResponse.data.id;
 
-      // 2. Crear la cita
-      await axios.post(`${API_URL}citas/`, {
-        cliente: clienteId,
+      // Create Appointment
+      await axios.post(`${API_URL}citas`, {
+        cliente: clienteRes.data.id,
         servicio: formData.servicio_id,
         fecha: formData.fecha,
         hora_inicio: formData.hora_inicio,
       });
 
-      setMessage('¡Cita reservada con éxito! Te esperamos.');
-      setFormData(initialState);
-
-    } catch (err) {
-      console.error('Error al procesar la reserva:', err);
-
-      if (axios.isAxiosError(err) && err.response?.status === 400) {
-        // Mostrar mensaje específico del backend si existe
-        const msgBackend = err.response.data?.non_field_errors?.[0] || 'Conflicto de horario o datos inválidos.';
-        setMessage(`Error: ${msgBackend}`);
-      } else {
-        setMessage('Error al reservar. Intenta nuevamente.');
-      }
+      setMessage({ type: 'success', text: '¡Cita reservada con éxito! Te hemos enviado un email de confirmación.' });
+      setStep(4);
+    } catch (err: any) {
+      console.error(err);
+      setMessage({ type: 'error', text: err.response?.data?.error || 'Error al procesar la reserva. Intenta de nuevo.' });
     } finally {
       setLoading(false);
     }
   };
 
-  // --- RENDERIZADO ---
+  if (loadingInitial) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-xl mx-auto p-8 dark:bg-gray-900 min-h-screen">
-      <h1 className="text-3xl font-bold text-pink-500 mb-6 text-center">Reservar Cita</h1>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
 
-      {message && (
-        <div className={`p-3 mb-4 rounded ${message.includes('éxito') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {message}
+        {/* Header con botón Volver */}
+        <div className="mb-8 flex items-center justify-between">
+          <Link href="/" className="flex items-center text-pink-600 hover:text-pink-700 font-medium">
+            <ChevronLeft size={20} />
+            <span>Volver al inicio</span>
+          </Link>
+          <div className="flex gap-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className={`h-2 w-12 rounded-full ${step >= i ? 'bg-pink-500' : 'bg-gray-200'}`} />
+            ))}
+          </div>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-xl">
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
 
-        {/* Campo Servicio */}
-        <label className="block mb-4">
-          <span className="text-gray-700">Servicio Deseado</span>
-          <select
-            name="servicio_id"
-            value={formData.servicio_id || ''}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-          >
-            {loadingServicios ? (
-              <option value="" disabled>Cargando servicios...</option>
-            ) : servicios.length === 0 ? (
-              <option value="" disabled>No hay servicios disponibles.</option>
-            ) : (
-              <>
-                <option value="" disabled>Selecciona un servicio</option>
+          {/* STEP 1: Seleccionar Servicio */}
+          {step === 1 && (
+            <div className="p-8">
+              <h1 className="text-3xl font-serif text-gray-800 mb-2">Elige un tratamiento</h1>
+              <p className="text-gray-500 mb-8">Selecciona el servicio que deseas reservar.</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {servicios.map(s => (
-                  <option key={s.id} value={s.id}>{s.nombre}</option>
+                  <button
+                    key={s.id}
+                    onClick={() => handleServiceSelect(s.id)}
+                    className="text-left p-6 border-2 border-gray-100 rounded-2xl hover:border-pink-300 hover:bg-pink-50 transition-all duration-200 group"
+                  >
+                    <h3 className="text-xl font-bold text-gray-800 group-hover:text-pink-700">{s.nombre}</h3>
+                    <p className="text-gray-500 text-sm mt-1 mb-4 line-clamp-2">{s.descripcion}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-pink-600 font-bold">${parseFloat(s.precio).toFixed(2)}</span>
+                      <span className="text-gray-400 text-xs flex items-center gap-1">
+                        <Clock size={14} /> {s.duracion_minutos} min
+                      </span>
+                    </div>
+                  </button>
                 ))}
-              </>
-            )}
-          </select>
-        </label>
+              </div>
+            </div>
+          )}
 
-        {/* Campo Nombre */}
-        <label className="block mb-4">
-          <span className="text-gray-700">Tu Nombre</span>
-          <input
-            type="text"
-            name="cliente_nombre"
-            value={formData.cliente_nombre}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-          />
-        </label>
+          {/* STEP 2: Seleccionar Fecha y Hora */}
+          {step === 2 && (
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-8">
+                <button onClick={() => setStep(1)} className="p-2 hover:bg-gray-100 rounded-full">
+                  <ChevronLeft size={24} />
+                </button>
+                <div>
+                  <h1 className="text-3xl font-serif text-gray-800">Cuándo vienes?</h1>
+                  <p className="text-gray-500">Selecciona el día y la hora.</p>
+                </div>
+              </div>
 
-        {/* Campo Email */}
-        <label className="block mb-4">
-          <span className="text-gray-700">Email</span>
-          <input
-            type="email"
-            name="cliente_email"
-            value={formData.cliente_email}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-          />
-        </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Calendario Simple */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                  <input
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={formData.fecha}
+                    onChange={(e) => setFormData(prev => ({ ...prev, fecha: e.target.value, hora_inicio: '' }))}
+                    className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-pink-500 outline-none"
+                  />
+                </div>
 
-        {/* Campo Teléfono */}
-        <label className="block mb-4">
-          <span className="text-gray-700">Teléfono</span>
-          <input
-            type="tel"
-            name="cliente_telefono"
-            value={formData.cliente_telefono}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-          />
-        </label>
+                {/* Slots Selector */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Horarios disponibles</label>
+                  {!formData.fecha ? (
+                    <div className="p-8 border-2 border-dashed border-gray-100 rounded-2xl text-center text-gray-400">
+                      Primero selecciona una fecha
+                    </div>
+                  ) : loadingSlots ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="h-10 bg-gray-50 animate-pulse rounded-lg" />)}
+                    </div>
+                  ) : slots.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-2">
+                      {slots.map(slot => (
+                        <button
+                          key={slot}
+                          onClick={() => setFormData(prev => ({ ...prev, hora_inicio: slot }))}
+                          className={`p-3 rounded-xl border-2 transition-all ${formData.hora_inicio === slot
+                              ? 'bg-pink-500 border-pink-500 text-white shadow-lg'
+                              : 'border-gray-100 hover:border-pink-200 text-gray-600'
+                            }`}
+                        >
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 border-2 border-gray-50 rounded-2xl text-center text-gray-400">
+                      No hay horarios disponibles para este día.
+                    </div>
+                  )}
+                </div>
+              </div>
 
-        {/* Campo Fecha y Hora */}
-        <div className="flex gap-4 mb-4">
-          <label className="block w-1/2">
-            <span className="text-gray-700">Fecha</span>
-            <input
-              type="date"
-              name="fecha"
-              value={formData.fecha}
-              onChange={handleChange}
-              required
-              min={new Date().toISOString().split('T')[0]} // No permitir fechas pasadas
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-            />
-            <p className="text-xs text-gray-500 mt-1">Días disponibles según agenda.</p>
-          </label>
-          <label className="block w-1/2">
-            <span className="text-gray-700">Hora de Inicio</span>
-            <input
-              type="time"
-              name="hora_inicio"
-              value={formData.hora_inicio}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-            />
-          </label>
+              <button
+                disabled={!formData.hora_inicio}
+                onClick={handleNextStep}
+                className="w-full mt-12 py-4 bg-pink-500 text-white font-bold rounded-2xl hover:bg-pink-600 disabled:bg-gray-200 transition-all shadow-xl"
+              >
+                Continuar
+              </button>
+            </div>
+          )}
+
+          {/* STEP 3: Datos Personales */}
+          {step === 3 && (
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-8">
+                <button onClick={() => setStep(2)} className="p-2 hover:bg-gray-100 rounded-full">
+                  <ChevronLeft size={24} />
+                </button>
+                <div>
+                  <h1 className="text-3xl font-serif text-gray-800">Tus datos</h1>
+                  <p className="text-gray-500">Casi terminamos, solo necesitamos contactarte.</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Nombre completo"
+                  required
+                  value={formData.cliente_nombre}
+                  onChange={e => setFormData(prev => ({ ...prev, cliente_nombre: e.target.value }))}
+                  className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-pink-500 outline-none"
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  required
+                  value={formData.cliente_email}
+                  onChange={e => setFormData(prev => ({ ...prev, cliente_email: e.target.value }))}
+                  className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-pink-500 outline-none"
+                />
+                <input
+                  type="tel"
+                  placeholder="Teléfono (WhatsApp)"
+                  value={formData.cliente_telefono}
+                  onChange={e => setFormData(prev => ({ ...prev, cliente_telefono: e.target.value }))}
+                  className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-pink-500 outline-none"
+                />
+
+                <div className="mt-8 bg-pink-50 p-6 rounded-2xl border border-pink-100">
+                  <h4 className="font-bold text-pink-700 mb-2">Resumen de tu reserva</h4>
+                  <p className="text-pink-600">
+                    {servicios.find(s => s.id === formData.servicio_id)?.nombre} el día {formData.fecha} a las {formData.hora_inicio}hs.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 bg-pink-600 text-white font-bold rounded-2xl hover:bg-pink-700 disabled:bg-pink-300 transition-all shadow-xl mt-8"
+                >
+                  {loading ? 'Procesando...' : 'Confirmar Reserva'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* STEP 4: Éxito */}
+          {step === 4 && (
+            <div className="p-12 text-center">
+              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle size={48} />
+              </div>
+              <h1 className="text-4xl font-serif text-gray-800 mb-4">{message?.text}</h1>
+              <p className="text-gray-500 mb-8">Te enviaremos un recordatorio 24hs antes de tu cita.</p>
+              <Link
+                href="/"
+                className="inline-block py-4 px-12 bg-gray-800 text-white font-bold rounded-2xl hover:bg-gray-900 transition-all shadow-xl"
+              >
+                Volver al inicio
+              </Link>
+            </div>
+          )}
+
+          {message && step !== 4 && (
+            <div className={`mx-8 mb-8 p-4 rounded-xl flex items-center gap-3 ${message.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+              }`}>
+              {message.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
+              <span className="text-sm font-medium">{message.text}</span>
+            </div>
+          )}
         </div>
-
-        <button
-          type="submit"
-          disabled={loading || loadingServicios || servicios.length === 0}
-          className="w-full py-3 mt-4 bg-pink-500 text-white font-semibold rounded-md hover:bg-pink-600 transition duration-150 disabled:bg-pink-300"
-        >
-          {loading ? 'Reservando...' : 'Confirmar Reserva'}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

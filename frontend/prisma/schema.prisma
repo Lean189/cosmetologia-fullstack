@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-node"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Servicio {
+  id               String   @id @default(uuid())
+  nombre           String
+  descripcion      String
+  precio           Decimal  @db.Decimal(10, 2)
+  duracion_minutos Int
+  activo           Boolean  @default(true)
+  citas            Cita[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("servicios")
+}
+
+model Cliente {
+  id        String   @id @default(uuid())
+  nombre    String
+  apellido  String
+  email     String   @unique
+  telefono  String?
+  citas     Cita[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("clientes")
+}
+
+model Cita {
+  id          String   @id @default(uuid())
+  clienteId   String   @map("cliente_id")
+  servicioId  String   @map("servicio_id")
+  fecha       DateTime @db.Date
+  hora_inicio String
+  estado      String   @default("P") // P: Pendiente, C: Confirmada, A: Cancelada
+  notas       String?
+  cliente     Cliente  @relation(fields: [clienteId], references: [id])
+  servicio    Servicio @relation(fields: [servicioId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([fecha, hora_inicio])
+  @@map("citas")
+}
+
+model BloqueoHorario {
+  id    String   @id @default(uuid())
+  fecha DateTime @unique @db.Date
+  razon String?
+
+  @@map("bloqueos_horario")
+}
+
+model ConfiguracionHorario {
+  id            String  @id @default(uuid())
+  dia_semana    Int     @unique // 0=Lunes, 6=Domingo
+  activo        Boolean @default(true)
+  hora_apertura String  @default("10:00")
+  hora_cierre   String  @default("19:00")
+
+  @@map("configuracion_horario")
+}
