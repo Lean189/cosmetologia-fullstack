@@ -1,0 +1,123 @@
+2026-02-18T23:04:58.659242Z  INFO tailwindcss_oxide::scanner: Provided sources:
+2026-02-18T23:04:58.659306Z  INFO tailwindcss_oxide::scanner: Source: PublicSourceEntry { base: "H:\\web_anto\\cosmetologia_web", pattern: "**/*", negated: false }
+2026-02-18T23:04:58.659420Z  INFO tailwindcss_oxide::scanner: Optimized sources:
+2026-02-18T23:04:58.659432Z  INFO tailwindcss_oxide::scanner: Source: Auto { base: "H:\\web_anto\\cosmetologia_web" }
+2026-02-18T23:04:58.660995Z  INFO scan_sources: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.662181Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app"
+2026-02-18T23:04:58.662294Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api"
+2026-02-18T23:04:58.662503Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\citas"
+2026-02-18T23:04:58.662587Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\citas\\route.ts"
+2026-02-18T23:04:58.662652Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\clientes"
+2026-02-18T23:04:58.662749Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\clientes\\route.ts"
+2026-02-18T23:04:58.662825Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\configuracion-horario"
+2026-02-18T23:04:58.662899Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\configuracion-horario\\route.ts"
+2026-02-18T23:04:58.662959Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios"
+2026-02-18T23:04:58.663028Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\route.ts"
+2026-02-18T23:04:58.663083Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\[id]"
+2026-02-18T23:04:58.663171Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\[id]\\disponibilidad"
+2026-02-18T23:04:58.663242Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\[id]\\disponibilidad\\route.ts"
+2026-02-18T23:04:58.663319Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\globals.css"
+2026-02-18T23:04:58.663353Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\layout.tsx"
+2026-02-18T23:04:58.663388Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\page.tsx"
+2026-02-18T23:04:58.663449Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\reservar"
+2026-02-18T23:04:58.663528Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\reservar\\page.tsx"
+2026-02-18T23:04:58.663587Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\types"
+2026-02-18T23:04:58.663664Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\types\\index.ts"
+2026-02-18T23:04:58.663733Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\components"
+2026-02-18T23:04:58.663801Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\components\\Footer.tsx"
+2026-02-18T23:04:58.663832Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\components\\Header.tsx"
+2026-02-18T23:04:58.663865Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\components\\WhatsAppButton.tsx"
+2026-02-18T23:04:58.663910Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\eslint.config.mjs"
+2026-02-18T23:04:58.663967Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\IMAGENES.md"
+2026-02-18T23:04:58.664017Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\lib"
+2026-02-18T23:04:58.664085Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\lib\\availability.ts"
+2026-02-18T23:04:58.664119Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\lib\\supabase.ts"
+2026-02-18T23:04:58.664167Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\next.config.ts"
+2026-02-18T23:04:58.664291Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\package.json"
+2026-02-18T23:04:58.664323Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\postcss.config.mjs"
+2026-02-18T23:04:58.664373Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\public"
+2026-02-18T23:04:58.664469Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\public\\file.svg"
+2026-02-18T23:04:58.664500Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\public\\globe.svg"
+2026-02-18T23:04:58.664535Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\public\\next.svg"
+2026-02-18T23:04:58.664568Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\public\\vercel.svg"
+2026-02-18T23:04:58.664600Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\public\\window.svg"
+2026-02-18T23:04:58.664639Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\README.md"
+2026-02-18T23:04:58.664685Z  INFO scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\tsconfig.json"
+2026-02-18T23:04:58.664742Z  INFO scan_sources: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.664747Z  INFO extract_candidates: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.664752Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.664755Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: Reading 26 file(s)
+2026-02-18T23:04:58.665018Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\api\\citas\\route.ts"
+2026-02-18T23:04:58.665030Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\IMAGENES.md"
+2026-02-18T23:04:58.665077Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\api\\clientes\\route.ts"
+2026-02-18T23:04:58.665087Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\lib\\availability.ts"
+2026-02-18T23:04:58.665086Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\page.tsx"
+2026-02-18T23:04:58.665119Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\api\\configuracion-horario\\route.ts"
+2026-02-18T23:04:58.665125Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\lib\\supabase.ts"
+2026-02-18T23:04:58.665126Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\public\\file.svg"
+2026-02-18T23:04:58.665157Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\reservar\\page.tsx"
+2026-02-18T23:04:58.665157Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\public\\vercel.svg"
+2026-02-18T23:04:58.665161Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\next.config.ts"
+2026-02-18T23:04:58.665160Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\route.ts"
+2026-02-18T23:04:58.665179Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\public\\globe.svg"
+2026-02-18T23:04:58.665193Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\public\\window.svg"
+2026-02-18T23:04:58.665220Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\[id]\\disponibilidad\\route.ts"
+2026-02-18T23:04:58.665197Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\package.json"
+2026-02-18T23:04:58.665199Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\types\\index.ts"
+2026-02-18T23:04:58.665247Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\public\\next.svg"
+2026-02-18T23:04:58.665255Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\tsconfig.json"
+2026-02-18T23:04:58.665267Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\layout.tsx"
+2026-02-18T23:04:58.665277Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\postcss.config.mjs"
+2026-02-18T23:04:58.665283Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\README.md"
+2026-02-18T23:04:58.665293Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\components\\Footer.tsx"
+2026-02-18T23:04:58.665297Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\eslint.config.mjs"
+2026-02-18T23:04:58.665306Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\components\\Header.tsx"
+2026-02-18T23:04:58.665320Z  INFO tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\components\\WhatsAppButton.tsx"
+2026-02-18T23:04:58.665358Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.665365Z  INFO extract_candidates:parse_all_blobs: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.665368Z  INFO extract_candidates:parse_all_blobs:extract: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.666237Z  INFO extract_candidates:parse_all_blobs:extract: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.666259Z  INFO extract_candidates:parse_all_blobs: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.666264Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.666266Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: Reading 1 file(s)
+2026-02-18T23:04:58.666354Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: Reading "H:\\web_anto\\cosmetologia_web\\app\\globals.css"
+2026-02-18T23:04:58.666360Z  INFO extract_candidates:read_all_files: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.666364Z  INFO extract_candidates:extract_css_variables: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.666366Z  INFO extract_candidates:extract_css_variables:extract: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.666401Z  INFO extract_candidates:extract_css_variables:extract: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.666406Z  INFO extract_candidates:extract_css_variables: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.666689Z  INFO extract_candidates: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.667104Z  INFO get_files: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.667114Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.667972Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app"
+2026-02-18T23:04:58.668068Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api"
+2026-02-18T23:04:58.668155Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\citas"
+2026-02-18T23:04:58.668277Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\clientes"
+2026-02-18T23:04:58.668393Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\configuracion-horario"
+2026-02-18T23:04:58.668510Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios"
+2026-02-18T23:04:58.668617Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\[id]"
+2026-02-18T23:04:58.668718Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\[id]\\disponibilidad"
+2026-02-18T23:04:58.668917Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\reservar"
+2026-02-18T23:04:58.669026Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\types"
+2026-02-18T23:04:58.669145Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\components"
+2026-02-18T23:04:58.669321Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\lib"
+2026-02-18T23:04:58.669586Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\public"
+2026-02-18T23:04:58.669814Z  INFO get_files:scan_sources: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.669845Z  INFO get_files: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.669987Z  INFO get_globs: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.669992Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: enter
+2026-02-18T23:04:58.670756Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app"
+2026-02-18T23:04:58.670850Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api"
+2026-02-18T23:04:58.670939Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\citas"
+2026-02-18T23:04:58.671055Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\clientes"
+2026-02-18T23:04:58.671432Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\configuracion-horario"
+2026-02-18T23:04:58.671740Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios"
+2026-02-18T23:04:58.671893Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\[id]"
+2026-02-18T23:04:58.671984Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\api\\servicios\\[id]\\disponibilidad"
+2026-02-18T23:04:58.672192Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\reservar"
+2026-02-18T23:04:58.672303Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\app\\types"
+2026-02-18T23:04:58.672426Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\components"
+2026-02-18T23:04:58.672610Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\lib"
+2026-02-18T23:04:58.672886Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: Discovering "H:\\web_anto\\cosmetologia_web\\public"
+2026-02-18T23:04:58.673123Z  INFO get_globs:scan_sources: tailwindcss_oxide::scanner: exit
+2026-02-18T23:04:58.675362Z  INFO get_globs: tailwindcss_oxide::scanner: exit

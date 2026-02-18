@@ -17,6 +17,8 @@ interface Servicio {
 // --- CONSTANTES ---
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 // --- FUNCION DE FETCHING (Server Component) ---
 async function getServicios(): Promise<Servicio[]> {
   try {
@@ -26,7 +28,10 @@ async function getServicios(): Promise<Servicio[]> {
       .eq('activo', true)
       .order('nombre', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase Error (getServicios):", error.message);
+      throw error;
+    }
     return data || [];
   } catch (error) {
     console.error("Error al obtener servicios:", error);
