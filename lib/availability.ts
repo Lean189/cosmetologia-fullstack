@@ -71,7 +71,7 @@ export async function getAvailableSlots(servicioId: string, fechaStr: string) {
             slots.push(format(current, 'HH:mm'));
         }
 
-        current = addMinutes(current, 30);
+        current = addMinutes(current, 60);
     }
 
     return slots;
