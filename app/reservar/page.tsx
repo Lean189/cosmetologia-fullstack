@@ -5,17 +5,18 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ChevronLeft, Clock, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 // --- INTERFACES ---
 interface Servicio {
-  id: string; // Updated to String for UUID
+  id: string;
   nombre: string;
   descripcion: string;
   precio: string;
   duracion_minutos: number;
 }
 
-interface FormData {
+interface AppointmentFormData {
   cliente_nombre: string;
   cliente_email: string;
   cliente_telefono: string;
@@ -26,8 +27,6 @@ interface FormData {
 
 const API_URL = '/api/';
 
-import toast from 'react-hot-toast';
-
 export default function ReservarPage() {
   const [step, setStep] = useState(1);
   const [servicios, setServicios] = useState<Servicio[]>([]);
@@ -36,7 +35,7 @@ export default function ReservarPage() {
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<AppointmentFormData>({
     cliente_nombre: '',
     cliente_email: '',
     cliente_telefono: '',
@@ -95,6 +94,21 @@ export default function ReservarPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validación de campos obligatorios
+    if (!formData.cliente_nombre.trim()) {
+      toast.error('El nombre completo es obligatorio.');
+      return;
+    }
+    if (!formData.cliente_email.trim()) {
+      toast.error('El email es obligatorio.');
+      return;
+    }
+    if (!formData.cliente_telefono.trim()) {
+      toast.error('El teléfono de WhatsApp es obligatorio.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -105,12 +119,14 @@ export default function ReservarPage() {
         telefono: formData.cliente_telefono,
       });
 
-      // Create Appointment
+      // Create Appointment (se pasa nombre y telefono para la notif de WhatsApp)
       await axios.post(`${API_URL}citas`, {
         cliente: clienteRes.data.id,
         servicio: formData.servicio_id,
         fecha: formData.fecha,
         hora_inicio: formData.hora_inicio,
+        cliente_nombre: formData.cliente_nombre,
+        cliente_telefono: formData.cliente_telefono,
       });
 
       toast.success('¡Cita reservada con éxito!');
@@ -264,30 +280,54 @@ export default function ReservarPage() {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Nombre completo"
-                  required
-                  value={formData.cliente_nombre}
-                  onChange={e => setFormData(prev => ({ ...prev, cliente_nombre: e.target.value }))}
-                  className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-pink-500 outline-none"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  required
-                  value={formData.cliente_email}
-                  onChange={e => setFormData(prev => ({ ...prev, cliente_email: e.target.value }))}
-                  className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-pink-500 outline-none"
-                />
-                <input
-                  type="tel"
-                  placeholder="Teléfono (WhatsApp)"
-                  value={formData.cliente_telefono}
-                  onChange={e => setFormData(prev => ({ ...prev, cliente_telefono: e.target.value }))}
-                  className="w-full p-4 border-2 border-gray-100 rounded-2xl focus:border-pink-500 outline-none"
-                />
+              <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                <p className="text-xs text-gray-400">Los campos marcados con <span className="text-pink-500 font-bold">*</span> son obligatorios.</p>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre completo <span className="text-pink-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: María García"
+                    required
+                    value={formData.cliente_nombre}
+                    onChange={e => setFormData(prev => ({ ...prev, cliente_nombre: e.target.value }))}
+                    className={`w-full p-4 border-2 rounded-2xl focus:border-pink-500 outline-none transition-colors ${formData.cliente_nombre.trim() === '' ? 'border-gray-100' : 'border-green-200'
+                      }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email <span className="text-pink-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="Ej: maria@email.com"
+                    required
+                    value={formData.cliente_email}
+                    onChange={e => setFormData(prev => ({ ...prev, cliente_email: e.target.value }))}
+                    className={`w-full p-4 border-2 rounded-2xl focus:border-pink-500 outline-none transition-colors ${formData.cliente_email.trim() === '' ? 'border-gray-100' : 'border-green-200'
+                      }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Teléfono WhatsApp <span className="text-pink-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="Ej: 11 1234-5678"
+                    required
+                    value={formData.cliente_telefono}
+                    onChange={e => setFormData(prev => ({ ...prev, cliente_telefono: e.target.value }))}
+                    className={`w-full p-4 border-2 rounded-2xl focus:border-pink-500 outline-none transition-colors ${formData.cliente_telefono.trim() === '' ? 'border-gray-100' : 'border-green-200'
+                      }`}
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Te enviaremos la confirmación del turno por WhatsApp.</p>
+                </div>
 
                 <div className="mt-8 bg-pink-50 p-6 rounded-2xl border border-pink-100">
                   <h4 className="font-bold text-pink-700 mb-2">Resumen de tu reserva</h4>
