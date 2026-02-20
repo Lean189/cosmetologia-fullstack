@@ -14,12 +14,18 @@ interface Servicio {
   activo: boolean;
 }
 
+interface Testimonio {
+  id: number;
+  nombre: string;
+  quote: string;
+}
+
 // --- CONSTANTES ---
 import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-// --- FUNCION DE FETCHING (Server Component) ---
+// --- FUNCIONES DE FETCHING (Server Components) ---
 async function getServicios(): Promise<Servicio[]> {
   try {
     const { data, error } = await supabase
@@ -39,6 +45,25 @@ async function getServicios(): Promise<Servicio[]> {
   }
 }
 
+async function getTestimonios(): Promise<Testimonio[]> {
+  try {
+    const { data, error } = await supabase
+      .from('testimonios')
+      .select('*')
+      .eq('activo', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Supabase Error (getTestimonios):", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (error) {
+    console.error("Error al obtener testimonios:", error);
+    return [];
+  }
+}
+
 
 // --- COMPONENTE AUXILIAR (TestimonialCard) ---
 const TestimonialCard = ({ quote, name }: { quote: string, name: string }) => (
@@ -50,7 +75,10 @@ const TestimonialCard = ({ quote, name }: { quote: string, name: string }) => (
 
 // --- COMPONENTE PRINCIPAL (ASÍNCRONO - Server Component) ---
 export default async function LandingPage() {
-  const servicios = await getServicios();
+  const [servicios, testimonios] = await Promise.all([
+    getServicios(),
+    getTestimonios()
+  ]);
 
   return (
     <main className="overflow-x-hidden">
@@ -104,7 +132,7 @@ export default async function LandingPage() {
                 </div>
                 <p className="text-gray-500 text-sm md:text-base">Foto Profesional</p>
               </div>
-              /<Image src="/antonella-professional.jpg" alt="Antonella - Cosmetóloga Profesional" fill className="object-cover" />
+              <Image src="/antonella-professional.jpg" alt="Antonella - Cosmetóloga Profesional" fill className="object-cover" />
             </div>
           </div>
 
@@ -198,21 +226,23 @@ export default async function LandingPage() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            <TestimonialCard
-              quote="Mi piel nunca se ha sentido tan suave y luminosa. ¡Resultados increíbles! La mejor cosmetóloga que he visitado."
-              name="Ana S."
-            />
-            <TestimonialCard
-              quote="La atención es 10/10. Realmente personalizan el tratamiento. Me dieron una solución que nadie más pudo."
-              name="Sofía M."
-            />
-            <TestimonialCard
-              quote="Los productos son fantásticos y el ambiente es muy relajante. Mi momento de paz semanal."
-              name="Miguel A."
-            />
+            {testimonios.length === 0 ? (
+              <div className="col-span-full">
+                <p className="text-gray-500 italic">Cargando comentarios positivos...</p>
+              </div>
+            ) : (
+              testimonios.map((t) => (
+                <TestimonialCard
+                  key={t.id}
+                  quote={t.quote}
+                  name={t.nombre}
+                />
+              ))
+            )}
           </div>
         </div>
       </section>
+
 
       <hr className="border-t border-pink-200" />
 
