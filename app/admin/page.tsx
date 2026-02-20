@@ -1,49 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import AdminHeader from '@/components/AdminHeader';
 
 export default function AdminDashboard() {
-    const router = useRouter();
-
-    const handleLogout = async () => {
-        await fetch('/api/admin/logout', { method: 'POST' });
-        router.push('/admin/login');
-        router.refresh();
-    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-100">
             {/* Header */}
-            <header className="bg-white shadow-sm border-b border-pink-100">
-                <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl flex items-center justify-center">
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 className="font-bold text-gray-800 text-lg leading-tight">Panel de Admin</h1>
-                            <p className="text-xs text-gray-400">Skinstudio by Anto</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Link href="/" target="_blank" className="text-sm text-pink-600 hover:underline flex items-center gap-1">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                            Ver sitio
-                        </Link>
-                        <button
-                            onClick={handleLogout}
-                            className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-xl transition font-medium"
-                        >
-                            Cerrar sesión
-                        </button>
-                    </div>
-                </div>
-            </header>
+            <AdminHeader title="Panel de Admin" showViewSite={true} />
 
             {/* Main */}
             <main className="max-w-6xl mx-auto px-6 py-10">

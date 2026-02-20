@@ -23,7 +23,7 @@ interface Testimonio {
 // --- CONSTANTES ---
 import { supabase } from '@/lib/supabase';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // ISR: Revalidar cada 1 hora
 
 // --- FUNCIONES DE FETCHING (Server Components) ---
 async function getServicios(): Promise<Servicio[]> {
@@ -165,7 +165,7 @@ export default async function LandingPage() {
 
           {/* CONTENEDOR DEL CARRUSEL - RESPONSIVE */}
           <div
-            className="flex space-x-4 md:space-x-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory 
+            className="flex space-x-4 md:space-x-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory scroll-smooth 
                       scrollbar-thin scrollbar-thumb-pink-400/50 scrollbar-track-pink-100 -mx-4 px-4 sm:mx-0 sm:px-0"
           >
             {servicios.length === 0 ? (
