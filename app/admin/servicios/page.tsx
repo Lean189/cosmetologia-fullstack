@@ -31,7 +31,10 @@ export default function AdminServiciosPage() {
         setLoading(false);
     }, []);
 
-    useEffect(() => { fetchServicios(); }, [fetchServicios]);
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchServicios();
+    }, [fetchServicios]);
 
     const showMsg = (type: 'ok' | 'error', text: string) => {
         setMsg({ type, text });

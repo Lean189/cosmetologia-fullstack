@@ -23,7 +23,7 @@ interface Testimonio {
 // --- CONSTANTES ---
 import { supabase } from '@/lib/supabase';
 
-export const revalidate = 3600; // ISR: Revalidar cada 1 hora
+export const revalidate = 60; // ISR: Revalidar cada 60 segundos (aunque usamos revalidatePath para cambios inmediatos)
 
 // --- FUNCIONES DE FETCHING (Server Components) ---
 async function getServicios(): Promise<Servicio[]> {

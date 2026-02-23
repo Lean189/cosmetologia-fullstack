@@ -46,17 +46,37 @@ export async function POST(request: Request) {
 
         const { cliente, servicio, fecha, hora_inicio, notas, cliente_nombre, cliente_telefono } = validation.data;
 
-        // 1. Validar disponibilidad (doble check)
-        const { data: existing } = await supabase
-            .from('citas')
-            .select('id')
-            .eq('fecha', fecha)
-            .eq('hora_inicio', hora_inicio)
-            .neq('estado', 'A')
-            .maybeSingle();
+        // 1. Validar disponibilidad (doble check de solapamiento)
+        const { data: servicioData } = await supabase
+            .from('servicios')
+            .select('duracion_minutos')
+            .eq('id', servicio)
+            .single();
 
-        if (existing) {
-            return NextResponse.json({ error: 'El horario ya no está disponible' }, { status: 400 });
+        if (!servicioData) {
+            return NextResponse.json({ error: 'Servicio no encontrado' }, { status: 404 });
+        }
+
+        const duracionSolicitada = servicioData.duracion_minutos;
+        const { data: citasExistentes } = await supabase
+            .from('citas')
+            .select('hora_inicio, servicios(duracion_minutos)')
+            .eq('fecha', fecha)
+            .neq('estado', 'A');
+
+        const { parse, addMinutes, isBefore } = await import('date-fns');
+        const d = new Date(); // base para parse
+        const slotInicio = parse(hora_inicio, 'HH:mm', d);
+        const slotFin = addMinutes(slotInicio, duracionSolicitada);
+
+        const isConflicting = (citasExistentes as unknown as { hora_inicio: string, servicios: { duracion_minutos: number } }[] || []).some(cita => {
+            const cInicio = parse(cita.hora_inicio, 'HH:mm', d);
+            const cFin = addMinutes(cInicio, cita.servicios.duracion_minutos);
+            return isBefore(slotInicio, cFin) && isBefore(cInicio, slotFin);
+        });
+
+        if (isConflicting) {
+            return NextResponse.json({ error: 'El horario ya no está disponible (se solapa con otra cita)' }, { status: 400 });
         }
 
         // 2. Crear la cita

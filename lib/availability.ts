@@ -1,6 +1,17 @@
 import { format, addMinutes, parse, isBefore, isEqual, startOfDay } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 
+interface Cita {
+    hora_inicio: string;
+    servicios: {
+        duracion_minutos: number;
+    };
+}
+
+interface Servicio {
+    duracion_minutos: number;
+}
+
 export async function getAvailableSlots(servicioId: string, fechaStr: string) {
     const fecha = parse(fechaStr, 'yyyy-MM-dd', new Date());
     const today = startOfDay(new Date());
@@ -37,6 +48,8 @@ export async function getAvailableSlots(servicioId: string, fechaStr: string) {
 
     if (!servicio) throw new Error('Servicio no encontrado');
 
+    const servicioTyped = servicio as unknown as Servicio;
+
     // 3. Obtener citas existentes
     const { data: citas } = await supabase
         .from('citas')
@@ -45,7 +58,7 @@ export async function getAvailableSlots(servicioId: string, fechaStr: string) {
         .neq('estado', 'A');
 
     const slots: string[] = [];
-    const duracion = servicio.duracion_minutos;
+    const duracion = servicioTyped.duracion_minutos;
 
     let current = parse(config.hora_apertura, 'HH:mm', fecha);
     const end = parse(config.hora_cierre, 'HH:mm', fecha);
@@ -61,7 +74,7 @@ export async function getAvailableSlots(servicioId: string, fechaStr: string) {
         const slotInicio = current;
         const slotFin = addMinutes(current, duracion);
 
-        const isConflicting = (citas || []).some((cita: any) => {
+        const isConflicting = (citas as unknown as Cita[] || []).some((cita) => {
             const citaInicio = parse(cita.hora_inicio, 'HH:mm', fecha);
             const citaFin = addMinutes(citaInicio, cita.servicios.duracion_minutos);
             return isBefore(slotInicio, citaFin) && isBefore(citaInicio, slotFin);

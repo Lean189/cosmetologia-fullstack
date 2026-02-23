@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { revalidatePath } from 'next/cache';
 
 // GET: traer todos los servicios (activos e inactivos)
 export async function GET() {
@@ -28,6 +29,10 @@ export async function POST(request: Request) {
         .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Revalidar la página principal
+    revalidatePath('/');
+
     return NextResponse.json(data, { status: 201 });
 }
 
@@ -46,6 +51,10 @@ export async function PUT(request: Request) {
         .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Revalidar la página principal
+    revalidatePath('/');
+
     return NextResponse.json(data);
 }
 
@@ -59,5 +68,9 @@ export async function DELETE(request: Request) {
     const { error } = await supabase.from('servicios').delete().eq('id', id);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Revalidar la página principal
+    revalidatePath('/');
+
     return NextResponse.json({ success: true });
 }
