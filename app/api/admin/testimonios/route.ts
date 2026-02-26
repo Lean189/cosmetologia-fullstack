@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { isAuthenticated } from '@/lib/auth';
 
 // GET: traer todos los testimonios
 export async function GET() {
@@ -14,6 +15,9 @@ export async function GET() {
 
 // POST: crear nuevo testimonio
 export async function POST(request: Request) {
+    if (!await isAuthenticated()) {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
     const { nombre, quote } = body;
 
@@ -33,6 +37,9 @@ export async function POST(request: Request) {
 
 // PUT: editar testimonio
 export async function PUT(request: Request) {
+    if (!await isAuthenticated()) {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
     const { id, nombre, quote, activo } = body;
 
@@ -51,6 +58,9 @@ export async function PUT(request: Request) {
 
 // DELETE: eliminar testimonio
 export async function DELETE(request: Request) {
+    if (!await isAuthenticated()) {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

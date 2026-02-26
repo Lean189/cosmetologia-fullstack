@@ -69,7 +69,12 @@ export async function POST(request: Request) {
         const slotInicio = parse(hora_inicio, 'HH:mm', d);
         const slotFin = addMinutes(slotInicio, duracionSolicitada);
 
-        const isConflicting = (citasExistentes as unknown as { hora_inicio: string, servicios: { duracion_minutos: number } }[] || []).some(cita => {
+        interface CitaConServicio {
+            hora_inicio: string;
+            servicios: { duracion_minutos: number };
+        }
+
+        const isConflicting = (citasExistentes as unknown as CitaConServicio[] || []).some(cita => {
             const cInicio = parse(cita.hora_inicio, 'HH:mm', d);
             const cFin = addMinutes(cInicio, cita.servicios.duracion_minutos);
             return isBefore(slotInicio, cFin) && isBefore(cInicio, slotFin);
@@ -100,8 +105,10 @@ export async function POST(request: Request) {
         // 3. Enviar correos (Resend)
         if (resend) {
             try {
-                const clienteData = nuevaCita.clientes as unknown as { nombre: string, apellido: string, email: string };
-                const servicioData = nuevaCita.servicios as unknown as { nombre: string };
+                interface ClienteData { nombre: string; apellido: string; email: string }
+                interface ServicioData { nombre: string }
+                const clienteData = nuevaCita.clientes as unknown as ClienteData;
+                const servicioData = nuevaCita.servicios as unknown as ServicioData;
 
                 // Al admin
                 await resend.emails.send({
@@ -130,8 +137,10 @@ export async function POST(request: Request) {
         }
 
         // 4. Notificar por WhatsApp a la dueña (no bloquea la respuesta)
-        const clienteData2 = nuevaCita.clientes as unknown as { nombre: string, apellido: string, telefono?: string };
-        const servicioData2 = nuevaCita.servicios as unknown as { nombre: string };
+        interface ClienteDataWA { nombre: string; apellido: string; telefono?: string }
+        interface ServicioDataWA { nombre: string }
+        const clienteData2 = nuevaCita.clientes as unknown as ClienteDataWA;
+        const servicioData2 = nuevaCita.servicios as unknown as ServicioDataWA;
         const nombreCliente = cliente_nombre || `${clienteData2.nombre} ${clienteData2.apellido || ''}`.trim();
         const telefonoCliente = cliente_telefono || clienteData2.telefono || 'No indicado';
         const waMsg = `🌸 NUEVO TURNO!\n👤 ${nombreCliente}\n📱 ${telefonoCliente}\n💆 ${servicioData2.nombre}\n📅 ${fecha} a las ${hora_inicio}hs\n\n¡A preparar todo! ✨`;

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
+import { isAuthenticated } from '@/lib/auth';
 
 // GET: traer todos los servicios (activos e inactivos)
 export async function GET() {
@@ -15,6 +15,9 @@ export async function GET() {
 
 // POST: crear nuevo servicio
 export async function POST(request: Request) {
+    if (!await isAuthenticated()) {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
     const { nombre, descripcion, precio, duracion_minutos } = body;
 
@@ -38,6 +41,9 @@ export async function POST(request: Request) {
 
 // PUT: editar servicio existente
 export async function PUT(request: Request) {
+    if (!await isAuthenticated()) {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const body = await request.json();
     const { id, nombre, descripcion, precio, duracion_minutos, activo } = body;
 
@@ -60,6 +66,9 @@ export async function PUT(request: Request) {
 
 // DELETE: eliminar servicio
 export async function DELETE(request: Request) {
+    if (!await isAuthenticated()) {
+        return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
